@@ -1,9 +1,9 @@
 # EvE (libs)
 
 For the API Documentation, please see
-[evelopedia](https://wiki.eveonline.com/en/wiki/XML_API_Getting_Started)
-[3rd-party-documentation](https://eveonline-third-party-documentation.readthedocs.org/en/latest/)
-[eve-id api documentation](http://wiki.eve-id.net/APIv2_Page_Index)
+[evelopedia](https://wiki.eveonline.com/en/wiki/XML_API_Getting_Started), 
+[3rd-party-documentation](https://eveonline-third-party-documentation.readthedocs.org/en/latest/), 
+[eve-id api documentation](http://wiki.eve-id.net/APIv2_Page_Index).
 
 In case you need more documentation, 
 [Try some research](http://lmgtfy.com/?q=eve+online+api+documentation).
