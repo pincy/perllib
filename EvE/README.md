@@ -40,6 +40,8 @@ $api->attr( "characterID", $cids[0] );
 $response = $api->loadPath([ "char", "IndustryJobs" ]);
 ```
 
+See the eveapi.pl for further example usage.
+
 ### Evecrest
 
 Lib for the CREST API.
@@ -56,6 +58,18 @@ my $api = EvE::Eveapi->new();
 
 #lets load some data
 my $items = $api->load_child_multipage({ name=> "itemGroups" });
+```
+
+See the BlueprintProcessor folder for further example usage.
+```
+# extract BPOs
+BlueprintExtractor.pl -j > .itemgroupBPOs.json
+# extraction can take quite a while... you should buffer the current data...
+
+# show all BPOs for itemgroup 105
+BlueprintProcessor.pl -f .BPOitemgroups.json 105
+# show all BPOs in a started group, for the account key(s)
+BlueprintProcessor.pl -f .BPOitemgroups.json -a ~/path_to/.apikeyfile
 ```
 
 ToDo: License.
