@@ -8,12 +8,15 @@ use XML::Simple;
 use File::Copy;
 
 
-#** @file Eveapi.pm
-# @brief a simple lib for the EvE Online XML API
-#**
+#** @file EvE::Eveapi
+# @brief Simple lib for accessing the XML API.
+#
+# Further explanation may come here some day.
+#*
 
-#** @function new (args)
-# @brief constructor, may be called with with args hash
+#** @method new (optional %$args)
+# @brief constructor, may be called with args hash
+#
 #
 # Valid Fields in the optional args are:
 # 	- debug {0 == off, 1 == on}
@@ -22,7 +25,7 @@ use File::Copy;
 # 	- vCode
 # 	- characterID
 # 	- file {filename to load API Keys from, uses loadFile}
-#**
+#*
 
 sub new {
 	my $proto = shift;
@@ -45,12 +48,12 @@ sub new {
 	return $self;
 }
 
-#** @function attr (attr,val)
+#** @method attr ($attr,optional $val)
 # @brief sets/gets attribute
 #
 # If called with val, it sets the value of val in attr.
 # In any way, it returns the value of attr
-#**
+#*
 
 sub attr {
 	my ($self, $attr, $val) = @_;
@@ -61,7 +64,7 @@ sub attr {
 	return $self->{$attr};
 }
 
-#** @function loadFile (filename)
+#** @method loadFile (filename)
 # @brief loads the API credentials from filename
 #
 # Loads a json file, containing one or more API credentials.
@@ -71,11 +74,11 @@ sub attr {
 # 	- string with filename
 # 	- array_ref with [filename,index]
 #	- hash_ref with {name => filename, index => x}
-#**
+#*
 
 sub loadFile {
 	my ($self, $name) = @_;
-	if (! defined($self)) { return dieError("called without self"); }
+	if (! defined($self)) { return _dieError("called without self"); }
 	my ($f,$str,$index);
 	if (ref($name) eq "ARRAY") { ($name,$index) = @{ $name };}
 	if (ref($name) eq "HASH") {
@@ -83,8 +86,8 @@ sub loadFile {
 		$name = $name->{name} || $name->{filename} || undef;
 	}
 	if (! defined($index)) { $index = 0; }
-	if (! defined($name)) { return dieError("called without filename"); }
-	open($f, "< $name") or return dieError("Error on opening $name\n");
+	if (! defined($name)) { return _dieError("called without filename"); }
+	open($f, "< $name") or return _dieError("Error on opening $name\n");
 	while (my $l = <$f>) { $str = "$str$l"; }
 	close($f);
 	my $ret = from_json($str) || undef;
@@ -96,26 +99,26 @@ sub loadFile {
 	return $self;
 }
 
-#** @function saveFile (name, data)
+#** @method saveFile ($name, optional $data)
 # @brief save data or the current API credentials to name
 #
 # If data is omitted, the current API credentials are written to name.
 # In case name already exists, it will try to make a backup with the "bak"
 # extension
-#**
+#*
 
 sub saveFile {
 	my ($self, $name, $data) = @_;
-	if (! defined($self) || ! defined($name)) { return dieError("called without self or filename?"); }
+	if (! defined($self) || ! defined($name)) { return _dieError("called without self or filename?"); }
 	my $f;
 	if ($self->{debug}) { print "Writing to file $name: $data\n"; }
 	if (-f $name) {
 		if ($self->{debug}) { print "File $name exists, creating backup\n"; }
 		if (syscopy($name, $name."bak") == 0) {
-			return dieError("could not backup existing file. Error: '$!'");
+			return _dieError("could not backup existing file. Error: '$!'");
 		}
 	}
-	open($f, "> $name") or return dieError("Error on opening $name\n");
+	open($f, "> $name") or return _dieError("Error on opening $name\n");
 	if (! defined($data)) {
 		$data = { keyID => $self->{keyID}, vCode => $self->{vCode} }
 	}
@@ -124,31 +127,31 @@ sub saveFile {
 	return $self;
 }
 
-sub dieError {
+sub _dieError {
 	my ($self, $msg) = @_;
 	if (! defined($msg)) { $msg = $self; }
 	print STDERR $msg;
 	return undef;
 }
 
-sub getchild {
+sub _getchild {
 	my ($self, $arg) = @_;
 	if (! defined($arg) ) { $arg = $self; }
 	if (ref($arg) eq "HASH") {
 		my @keys = keys %{ $arg };
-		return [$keys[0], @{ getchild($arg->{$keys[0]}) } ];
+		return [$keys[0], @{ _getchild($arg->{$keys[0]}) } ];
 	}
 	return [$arg];
 }
 
-#** @function load (url)
+#** @method load (optional $url)
 # @brief loads url, or tries to load self->{url}
 #
-#**
+#*
 
 sub load {
 	my ($self, $url) = @_;
-	if (! defined($self) || (! defined($url) && ! defined($self->{url}))) { return dieError("called without self or url"); }
+	if (! defined($self) || (! defined($url) && ! defined($self->{url}))) { return _dieError("called without self or url"); }
 	if (defined($url)) { $self->{url} = $url; }
 	my $resp = $self->{ua}->get($self->{url});
 	if ($resp->is_success) {
@@ -159,12 +162,12 @@ sub load {
 		return $tmp;
 	}
 	else {
-		return dieError("response was ".$resp->code." - ".$resp->message."\n");
+		return _dieError("response was ".$resp->code." - ".$resp->message."\n");
 	}
 	return undef;
 }
 
-#** @function loadPath (arg)
+#** @method loadPath (arg)
 # @brief builds the url Path for the load function and calls it. plzusethis!!!
 #
 # arg needs to contain the path to be called. It may be:
@@ -172,14 +175,14 @@ sub load {
 # 	- hash_ref {e.g. { "account" => "APIKeyInfo" } }
 # If arg contains a character path and characterID was not set, it will be set to
 # the first characterID returned by the API
-#**
+#*
 
 sub loadPath {
 	my ($self, $arg) = @_;
-	if (! defined($self) || ! defined($arg)) { return dieError("called without self or path to call"); }
+	if (! defined($self) || ! defined($arg)) { return _dieError("called without self or path to call"); }
 	my $str = "/";
 	if (ref($arg) eq "HASH") {
-		$arg = getchild($arg);
+		$arg = _getchild($arg);
 	} elsif (ref($arg) eq "ARRAY") {
 		my @arr = @{ $arg };
 		$str .= join("/", @arr);

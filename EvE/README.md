@@ -8,6 +8,9 @@ For the API Documentation, please see
 In case you need more documentation, 
 [Try some research](http://lmgtfy.com/?q=eve+online+api+documentation).
 
+You can build the documentation with the included Doxyfile and 
+[doxygen-filter-perl](https://github.com/jordan2175/doxygen-filter-perl).
+
 ### Eveapi
 
 Lib for the XML API.
@@ -51,6 +54,10 @@ use EvE::Eveapi;
 # create an api object
 my $api = EvE::Eveapi->new();
 
+#lets load some data
+my $items = $api->load_child_multipage({ name=> "itemGroups" });
 ```
 
-ToDo: further documentation and generate docs
+ToDo: License.
+
+

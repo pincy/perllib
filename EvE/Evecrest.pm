@@ -9,7 +9,7 @@ use JSON;
 # TODO: load partner href and different things than child href, SSO
 ###
 #
-#** @file Evecrest.pm
+#** @file EvE::Evecrest.pm
 # @brief a simple lib for the EvE Online CREST API
 #
 # Missing Features:
@@ -17,7 +17,7 @@ use JSON;
 # 	- SSO
 #**
 
-#** @function new (args)
+#** @method new (args)
 # @brief constructor
 #
 # Valid Fields for the optional args are:
@@ -36,15 +36,15 @@ sub new {
 	$self->{'debug'} = (defined($arg->{debug}) ? $arg->{debug} : 0);
 	$self->{'crest_root'} = "https://public-crest.eveonline.com/";
 	$self->{'ua'} = LWP::UserAgent->new();
-	my $ua_str = (defined($args->{agent}) ?$args->{agent} : "perl_simple_crest");
-	$self->{'ua'}->agent($us_str);
+	my $ua_str = (defined($arg->{agent}) ?$arg->{agent} : "perl_simple_crest");
+	$self->{'ua'}->agent($ua_str);
 	$self->{'last'} = undef;
 	bless ($self, $class);
 	load_url($self, $self->{'crest_root'});
 	return $self;
 }
 
-#** @function load_url (url)
+#** @method load_url (url)
 # @brief justdontusethis!
 #
 #**
@@ -66,7 +66,7 @@ sub load_url {
 	}
 }
 
-#** @function load_child_href (arg)
+#** @method load_child_href (arg)
 # @brief load the href of the child with name
 #
 # arg is expected to be a hash_ref with the field
@@ -124,7 +124,7 @@ sub load_child_href {
 	return $self->{'last'};
 }
 
-#** @function load_child_multipage (arg)
+#** @method load_child_multipage (arg)
 # @brief same as load_child_href, but for multipage targets
 #
 #**
@@ -156,6 +156,14 @@ sub load_child_multipage {
 	return $self->{'last'};
 }
 
+#** @method search_in_array (arg)
+# @brief searches for a string in the supplied array and returns its index
+#
+# arg may be a 
+# 	- hash_ref with the fields \a search and \a arr
+# 	- array_ref with [ $search, $arr]
+#*
+
 sub search_in_array {
 	my ($self, $arg) = @_;
 	if (!defined($self) && ! defined($arg)) {
@@ -163,9 +171,8 @@ sub search_in_array {
 	}
 	my $search = $arg->{'search'} if defined($arg->{'search'});
 	my $arr = $arg->{'arr'} if defined($arg->{'arr'});
-	if (ref($arg) ne "HASH") {
-		$search = $self;
-		$arr = $arg;
+	if (ref($arg) eq "ARRAY") {
+		($search,$arr) = @{ $arg };
 	}
 	if (!defined($arr)) {
 		foreach my $k (keys %{$self->{'last'}}) {
