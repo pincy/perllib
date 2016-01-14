@@ -5,13 +5,13 @@ use warnings;
 use LWP::UserAgent;
 use JSON;
 
-###
-# TODO: load partner href and different things than child href, SSO
-###
-#
 #** @file EvE::Evecrest.pm
-# @brief a simple lib for the EvE Online CREST API
+# @brief a simple lib for the EvE Online CREST API.
 #
+# @description
+# Using this lib, you have to watch your application for rate limits.
+#
+# @TODO
 # Missing Features:
 # 	- partner href and other things, than child href
 # 	- SSO
@@ -20,13 +20,14 @@ use JSON;
 #** @method new (args)
 # @brief constructor
 #
+# @description
 # Valid Fields for the optional args are:
 # 	- debug {0 == off, 1 == on}
 # 	- agent {string for the LWP::UserAgent}
 # On creation, the root will be called and available for traversing on return.
 # The Evecrest object will allways contain the tree from the last call under the
 # {last} attribute.
-#**
+#*
 
 sub new {
 	my $proto = shift;
@@ -45,9 +46,9 @@ sub new {
 }
 
 #** @method load_url (url)
-# @brief justdontusethis!
+# @brief justdontusethis! never! ever!
 #
-#**
+#*
 
 sub load_url {
 	my ($self, $url) = @_;
@@ -69,6 +70,7 @@ sub load_url {
 #** @method load_child_href (arg)
 # @brief load the href of the child with name
 #
+# @description
 # arg is expected to be a hash_ref with the field
 # name. The function will look on the current top of the tree
 # for this name and load its child href.
@@ -159,6 +161,7 @@ sub load_child_multipage {
 #** @method search_in_array (arg)
 # @brief searches for a string in the supplied array and returns its index
 #
+# @description
 # arg may be a 
 # 	- hash_ref with the fields \a search and \a arr
 # 	- array_ref with [ $search, $arr]
