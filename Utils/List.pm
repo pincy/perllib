@@ -1,10 +1,10 @@
-package Utils::List 0.01;
+package Utils::List 0.02;
 
 use strict;
 use warnings;
 use utils::Backup;
 
-#** @file utils::List.pm
+#** @file Utils::List.pm
 # @brief simple linked list
 #
 # Provides a single linked list for anonymous data
