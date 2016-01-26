@@ -110,12 +110,117 @@ sub connect {
 	return 1;
 }
 
+#** @method sendqry (query)
+# @brief for sending a query without a returned value
+#
+# @returns undef on bad arguments
+# @returns the return status of connect() if it fails
+# @returns an error string on fail
+# @returns 1 on success
+#*
+
 sub sendqry {
 	my ($self, $q) = @_;
 	if (! defined($self) || ! defined($q)) {
 		return undef;
 	}
+	if (! defined($self->{dbh})) {
+		if ((my $dbret = $self->connect()) != 1) {
+			return $dbret;
+		}
+	}
+	$self->{dbh}->do($q);
+	if ($self->{dbh}->errstr()) {
+		return "Error: ".$self->{dbh}->errstr().", on ".$q;
+	}
+	return 1;
 }
 
+#** @method preparedqry (query, binds)
+# @brief for sending a prepared query without a returned value
+#
+# @description
+# If binds is just a array_ref, the call will be executed for each
+# element.
+# If binds is a nested array_ref, the call will be executed with t
+# he nested array_ref
+#
+# @returns undef on bad arguments
+# @returns the return status of connect() if it fails
+# @returns an error string on fail
+# @returns 1 on success
+#*
 
+sub preparedqry {
+	my ($self, $q, $binds) = @_;
+	if (! defined($self) || ! defined($q)) {
+		return undef;
+	}
+	if (! defined($self->{dbh})) {
+		if ((my $dbret = $self->connect()) != 1) {
+			return $dbret;
+		}
+	}
+	my $sth = $self->{dbh}->prepare($q);
+	if (ref($binds) eq "ARRAY" && ref($binds->[0]) eq "ARRAY") {
+		foreach my $rows (@{ $binds }) {
+			$sth->execute(@{ $rows });
+			if ($self->{dbh}->errstr()) {
+				my $ret = "Error: ".$self->{dbh}->errstr().", on ".$q;
+				$ret .= " with (".join(", ", @{ $rows }).")";
+				return $ret;
+			}
+		}
+	} elsif (ref($binds) eq "ARRAY") {
+		foreach my $row (@{ $binds }) {
+			$sth->execute(( $row ));
+			if ($self->{dbh}->errstr()) {
+				my $ret = "Error: ".$self->{dbh}->errstr().", on ".$q;
+				$ret .= " with (".$row.")";
+				return $ret;
+			}
+		}
+	}
+	return 1;
+}
+
+sub fetchqry {
+	my ($self, $q, $binds) = @_;
+	if (! defined($self) || ! defined($q)) {
+		return undef;
+	}
+	if (! defined($self->{dbh})) {
+		if ((my $dbret = $self->connect()) != 1) {
+			return $dbret;
+		}
+	}
+	my @vals = [];
+	my $sth = $self->{dbh}->prepare($q);
+	if (ref($binds) eq "ARRAY" && ref($binds->[0]) eq "ARRAY") {
+		foreach my $rows (@{ $binds }) {
+			$sth->execute(@{ $rows });
+			my $ans = $sth->fetchrow_arrayref();
+			push(@vals, $ans);
+			if ($self->{dbh}->errstr()) {
+				my $ret = "Error: ".$self->{dbh}->errstr().", on ".$q;
+				$ret .= " with (".$row.")";
+				return $ret;
+			}
+		}
+	} elsif (ref($binds) eq "ARRAY") {
+		foreach my $row (@{ $binds }) {
+			$sth->execute(( $row ));
+			my $ans = $sth->fetchrow_arrayref();
+			push(@vals, $ans);
+			if ($self->{dbh}->errstr()) {
+				my $ret = "Error: ".$self->{dbh}->errstr().", on ".$q;
+				$ret .= " with (".$row.")";
+				return $ret;
+			}
+		}
+	}
+	return \@vals;
+}
+
+1;
 

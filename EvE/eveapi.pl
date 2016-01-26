@@ -17,6 +17,7 @@ binmode STDOUT, ":utf8";
 #
 # API lib example, able to fetch Account Information.
 #
+# @description
 # Arguments:
 # 	- -h {show the help message}
 # 	- -o {Request generall data}

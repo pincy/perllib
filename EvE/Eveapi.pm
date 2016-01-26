@@ -12,11 +12,12 @@ use File::Copy;
 # @brief Simple lib for accessing the XML API.
 #
 # Further explanation may come here some day.
+# TODO:
+#  - permission checking
 #*
 
 #** @method new (optional %$args)
 # @brief constructor, may be called with args hash
-#
 #
 # Valid Fields in the optional args are:
 # 	- debug {0 == off, 1 == on}
@@ -64,7 +65,7 @@ sub attr {
 	return $self->{$attr};
 }
 
-#** @method loadFile (filename)
+#** @method loadFile ($$filename)
 # @brief loads the API credentials from filename
 #
 # Loads a json file, containing one or more API credentials.
@@ -99,7 +100,7 @@ sub loadFile {
 	return $self;
 }
 
-#** @method saveFile ($name, optional $data)
+#** @method saveFile ($$name, optional $data)
 # @brief save data or the current API credentials to name
 #
 # If data is omitted, the current API credentials are written to name.
@@ -144,7 +145,7 @@ sub _getchild {
 	return [$arg];
 }
 
-#** @method load (optional $url)
+#** @method load (optional $$url)
 # @brief loads url, or tries to load self->{url}
 #
 #*
@@ -218,11 +219,18 @@ sub loadPath {
 	return $self->load();
 }
 
-###
-# static possible data export
-# - didn't find a dynamic way to get all api endpoints yet -
-# status 22.09.2015
-###
+#** @function getpossibles
+# @brief static possible data export
+#
+# - didn't implement dynamic way to get all api endpoints yet - status 22.09.2015
+# @retval hash_ref the possible Endpoints, grouped by
+#  - account
+#  - api
+#  - char
+#  - corp
+#  - eve
+#  - map
+#*
 sub getpossibles {
 	return {
 		account => [ "AccountStatus", "APIKeyInfo", "Characters" ],
